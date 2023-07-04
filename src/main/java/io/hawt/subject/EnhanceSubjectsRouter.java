@@ -83,9 +83,9 @@ public class EnhanceSubjectsRouter extends RouteBuilder implements Constants {
 
     @Override
     public void configure() {
-        Utils.enableStatsAndInflightBrowse(getContext());
-
         from("direct:enhanceSubject")
+            .group("io.hawt.subject")
+            .id("subjectsEnhanced")
             .process(new IntervalQueryProcessor())
             .enrich("mongodb:evoTempusBean?database=evotempus&collection=intervals&operation=findAll", new EnhanceAggregationStrategy())
             .log("Subject Json: ${body}")

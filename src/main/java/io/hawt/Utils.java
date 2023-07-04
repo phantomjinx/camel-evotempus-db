@@ -2,7 +2,9 @@ package io.hawt;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.ExtendedCamelContext;
+import org.apache.camel.ManagementStatisticsLevel;
 import org.apache.camel.Message;
+import org.apache.camel.spi.ManagementAgent;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -27,7 +29,14 @@ public class Utils {
         extendedCamelContext.getProcessorExchangeFactory().setStatisticsEnabled(true);
         extendedCamelContext.getAsyncProcessorAwaitManager().getStatistics().setStatisticsEnabled(true);
 
+        // Enable performance stats for endpoint statistics
+        ManagementAgent agent = extendedCamelContext.getManagementStrategy().getManagementAgent();
+        agent.setLoadStatisticsEnabled(true);
+        agent.setEndpointRuntimeStatisticsEnabled(true);
+        agent.setStatisticsLevel(ManagementStatisticsLevel.Extended);
+
         context.getInflightRepository().setInflightBrowseEnabled(true);
         context.setBacklogTracing(true);
+//        context.getRuntimeEndpointRegistry().setEnabled(true);
     }
 }

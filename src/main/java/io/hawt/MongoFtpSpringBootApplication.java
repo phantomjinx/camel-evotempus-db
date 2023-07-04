@@ -1,7 +1,6 @@
 package io.hawt;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.component.metrics.MetricsComponent;
 import org.apache.camel.component.metrics.routepolicy.MetricsRoutePolicyFactory;
 import org.apache.camel.spring.boot.CamelContextConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +36,7 @@ public class MongoFtpSpringBootApplication {
                 MetricsRoutePolicyFactory fac = new MetricsRoutePolicyFactory();
                 fac.setMetricsRegistry(metricRegistry);
                 context.addRoutePolicyFactory(fac);
+                Utils.enableStatsAndInflightBrowse(context);
             }
 
             @Override
