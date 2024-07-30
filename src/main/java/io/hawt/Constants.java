@@ -2,10 +2,6 @@ package io.hawt;
 
 public interface Constants {
 
-    String RAW_DEST_DIR = "/home/phantomjinx/evotempus/raw";
-
-    String ENHANCED_DEST_DIR = "/home/phantomjinx/evotempus/enhanced";
-
     String GEOLOGICAL_TIMESCALE = "Geological Timescale";
 
     String INTERVALS = "intervals";

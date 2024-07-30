@@ -2,13 +2,17 @@ package io.hawt.interval;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 import io.hawt.Constants;
-import io.hawt.processor.FilenameProcessor;
+import io.hawt.processor.HTMLFilenameProcessor;
 import io.hawt.processor.JsonProcessor;
 
 @Component
 public class MongoIntervalsRouter extends RouteBuilder implements Constants {
+
+    @Value("${evotempus.dest.dir}")
+    private String destDir;
 
     @Override
     public void configure() {
@@ -23,9 +27,9 @@ public class MongoIntervalsRouter extends RouteBuilder implements Constants {
             .split(body())
             .process(new JsonProcessor())
             .log("Interval Json: ${body}")
-            .process(new FilenameProcessor(INTERVALS))
+            .process(new HTMLFilenameProcessor(INTERVALS))
             .to("metrics:timer:simple.timer?action=stop")
-            .to("file://" + ENHANCED_DEST_DIR);
+            .to("file://" + destDir);
 
         /**
          *  Adds rest route for intervals

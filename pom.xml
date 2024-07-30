@@ -11,10 +11,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring.boot-version>2.7.10</spring.boot-version>
+        <spring.boot-version>3.3.2</spring.boot-version>
         <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
-        <camel.version>3.20.3</camel.version>
-        <hawtio.version>3.0-M8</hawtio.version>
+        <camel.springboot.version>4.4.0.redhat-00025</camel.springboot.version>
+        <camel.version>4.4.0.redhat-00037</camel.version>
+        <hawtio.version>4.0.0.redhat-00072</hawtio.version>
     </properties>
 
     <dependencyManagement>
@@ -27,43 +28,20 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!-- Camel BOM -->
+            <!-- Camel BOMS -->
             <dependency>
                 <groupId>org.apache.camel.springboot</groupId>
                 <artifactId>camel-spring-boot-bom</artifactId>
-                <version>${camel.version}</version>
+                <version>${camel.springboot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.camel</groupId>
-                <artifactId>camel-support</artifactId>
+                <artifactId>camel-bom</artifactId>
                 <version>${camel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-debug</artifactId>
-                <version>${camel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-mongodb</artifactId>
-                <version>${camel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-metrics</artifactId>
-                <version>${camel.version}</version>
-            </dependency>
-            <dependency>
-                 <groupId>org.apache.camel.springboot</groupId>
-                <artifactId>camel-servlet-starter</artifactId>
-                <version>${camel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.camel.springboot</groupId>
-                <artifactId>camel-metrics-starter</artifactId>
-                <version>${camel.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>io.hawt</groupId>
@@ -127,6 +105,10 @@
             <artifactId>camel-servlet-starter</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-http-starter</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-mongodb</artifactId>
         </dependency>
@@ -134,7 +116,7 @@
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-metrics</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
@@ -154,10 +136,10 @@
             <artifactId>hawtio-springboot</artifactId>
         </dependency>
 
-        <!--
+      <!--
       This dependency is mandatory for enabling Camel management
       via JMX / Hawtio.
-    -->
+      -->
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-management</artifactId>
@@ -165,6 +147,14 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-support</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-spring-xml</artifactId>
         </dependency>
 
         <!--
@@ -187,7 +177,18 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <build>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -201,6 +202,12 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.boot-version}</version>
+                <configuration>
+                  <systemPropertyVariables>
+                    <evotempus.db.host>${evotempus.db.host}</evotempus.db.host>
+                    <evotempus.dest.dir>${evotempus.dest.dir}</evotempus.dest.dir>
+                  </systemPropertyVariables>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -216,4 +223,17 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+      <repository>
+        <id>central</id>
+        <name>Maven Central</name>
+        <url>http://repo1.maven.org/</url>
+      </repository>
+      <repository>
+        <id>redhat-ga</id>
+        <name>Red Hat General Release </name>
+        <url>https://maven.repository.redhat.com/ga/</url>
+      </repository>
+    </repositories>
 </project>

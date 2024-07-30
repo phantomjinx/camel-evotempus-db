@@ -1,0 +1,11 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: camel-evotempus
+  namespace: hawtio
+  labels:
+    app:  camel-evotempus
+spec:
+  to:
+    kind: Service
+    name: camel-evotempus-http

@@ -13,17 +13,32 @@ import com.codahale.metrics.MetricRegistry;
 
 @SpringBootApplication
 @ComponentScan(basePackages="io.hawt")
-public class MongoFtpSpringBootApplication {
+public class EvotempusSpringBootApplication {
 
     @Autowired
     private MetricRegistry metricRegistry;
 
     /**
      * A main method to start this application.
-     * @throws Exception 
+     * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        SpringApplication.run(MongoFtpSpringBootApplication.class, args);
+        String dbHost = System.getProperty("evotempus.db.host","");
+        if (dbHost.length() > 0) {
+            System.out.println("Info: evotempus.db.host property was specified as " + dbHost);
+        } else {
+            System.out.println("Info: no evotempus.db.host property was specified. Default will be used.");
+        }
+
+        String destDir = System.getProperty("evotempus.dest.dir","");
+        if (destDir.length() > 0) {
+            System.out.println("Info: evotempus.dest.dir property was specified as " + destDir);
+        } else {
+            System.out.println("Info: no evotempus.dest.dir property was specified.");
+            System.exit(1);
+        }
+
+        SpringApplication.run(EvotempusSpringBootApplication.class, args);
     }
 
     @Bean
@@ -42,7 +57,7 @@ public class MongoFtpSpringBootApplication {
             @Override
             public void afterApplicationStart(CamelContext camelContext) {
                 // TODO Auto-generated method stub
-                
+
             }
         };
     }

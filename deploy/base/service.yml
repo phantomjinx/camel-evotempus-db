@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: camel-evotempus-http
+  namespace: hawtio
+  labels:
+    app:  camel-evotempus
+spec:
+  type: NodePort
+  ports:
+    - name: camel-evotempus
+      port: 80
+      protocol: TCP
+      targetPort: nginx
+  selector:
+    app: camel-evotempus
+    group: io.hawt

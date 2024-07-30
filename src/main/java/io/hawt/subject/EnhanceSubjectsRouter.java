@@ -8,18 +8,23 @@ import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.bson.Document;
+
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import io.hawt.Constants;
 import io.hawt.Utils;
-import io.hawt.processor.FilenameProcessor;
+import io.hawt.processor.HTMLFilenameProcessor;
 import io.hawt.processor.IntervalQueryProcessor;
 
 @Component
 public class EnhanceSubjectsRouter extends RouteBuilder implements Constants {
+
+    @Value("${evotempus.dest.dir}")
+    private String destDir;
 
     private class DocComparator implements Comparator<Document> {
 
@@ -60,7 +65,7 @@ public class EnhanceSubjectsRouter extends RouteBuilder implements Constants {
             }
 
             Arrays.sort(intervalDocs, comparator);
-            
+
             JsonArray livedDuring = new JsonArray();
             for (Document intervalDoc : intervalDocs) {
                 String name = intervalDoc.get("name").toString();
@@ -89,9 +94,8 @@ public class EnhanceSubjectsRouter extends RouteBuilder implements Constants {
             .process(new IntervalQueryProcessor())
             .enrich("mongodb:evoTempusBean?database=evotempus&collection=intervals&operation=findAll", new EnhanceAggregationStrategy())
             .log("Subject Json: ${body}")
-            .process(new FilenameProcessor(SUBJECTS))
-            .to("file://" + ENHANCED_DEST_DIR)
-            .group("io.hawt.subject");
+            .process(new HTMLFilenameProcessor(SUBJECTS))
+            .to("file://" + destDir);
     }
 
 }
