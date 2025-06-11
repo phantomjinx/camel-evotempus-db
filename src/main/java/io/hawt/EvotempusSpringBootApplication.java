@@ -9,14 +9,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
-import com.codahale.metrics.MetricRegistry;
-
 @SpringBootApplication
 @ComponentScan(basePackages="io.hawt")
 public class EvotempusSpringBootApplication {
-
-    @Autowired
-    private MetricRegistry metricRegistry;
 
     /**
      * A main method to start this application.
@@ -55,24 +50,23 @@ public class EvotempusSpringBootApplication {
         SpringApplication.run(EvotempusSpringBootApplication.class, args);
     }
 
-    @Bean
-    CamelContextConfiguration contextConfiguration() {
-        return new CamelContextConfiguration() {
-
-            @Override
-            public void beforeApplicationStart(CamelContext context) {
-                System.out.println("Configuring camel metrics on all routes");
-                MetricsRoutePolicyFactory fac = new MetricsRoutePolicyFactory();
-                fac.setMetricsRegistry(metricRegistry);
-                context.addRoutePolicyFactory(fac);
-                Utils.enableStatsAndInflightBrowse(context);
-            }
-
-            @Override
-            public void afterApplicationStart(CamelContext camelContext) {
-                // TODO Auto-generated method stub
-
-            }
-        };
-    }
+    // @Bean
+    // CamelContextConfiguration contextConfiguration() {
+    //     return new CamelContextConfiguration() {
+    //
+    //         @Override
+    //         public void beforeApplicationStart(CamelContext context) {
+    //             System.out.println("Configuring camel metrics on all routes");
+    //             MetricsRoutePolicyFactory fac = new MetricsRoutePolicyFactory();
+    //             context.addRoutePolicyFactory(fac);
+    //             Utils.enableStatsAndInflightBrowse(context);
+    //         }
+    //
+    //         @Override
+    //         public void afterApplicationStart(CamelContext camelContext) {
+    //             // TODO Auto-generated method stub
+    //
+    //         }
+    //     };
+    // }
 }
