@@ -19,9 +19,27 @@ public class MongoConfig {
     @Value("${evotempus.db.host}")
     private String dbHost;
 
+    @Value("${evotempus.db.user}")
+    private String dbUser;
+
+    @Value("${evotempus.db.passwd}")
+    private String dbPasswd;
+
     @Bean("evoTempusBean")
     public MongoClient getMongoClient() {
-        ConnectionString conn = new ConnectionString("mongodb://" + dbHost + ":27017/evotempus");
+
+        String connStr = "mongodb://";
+        if (dbUser.length() > 0) {
+          connStr = connStr + dbUser + ":" + dbPasswd + "@";
+        }
+
+        connStr = connStr + dbHost + ":27017/evotempus";
+
+        if (dbUser.length() > 0) {
+          connStr = connStr + "?authSource=admin";
+        }
+
+        ConnectionString conn = new ConnectionString(connStr);
         MongoClientSettings settings = MongoClientSettings
                 .builder()
                 .applyConnectionString(conn)

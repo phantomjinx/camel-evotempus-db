@@ -45,6 +45,16 @@ spec:
           value: "useSslClientAuthentication=false,protocol=https"
         - name: EVOTEMPUS_DB_HOST
           value: "localhost"
+        - name: EVOTEMPUS_DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: evotempus-secret
+              key: username
+        - name: EVOTEMPUS_DB_PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: evotempus-secret
+              key: password
         - name: EVOTEMPUS_DEST_DIR
           value: "/home/evotempus"
         imagePullPolicy: Always
@@ -80,10 +90,8 @@ spec:
           timeoutSeconds: 1
         resources:
           limits:
-            cpu: "1.0"
             memory: 500Mi
           requests:
-            cpu: "0.2"
             memory: 256Mi
         securityContext:
           privileged: false
@@ -110,10 +118,8 @@ spec:
           timeoutSeconds: 1
         resources:
           requests:
-            cpu: "0.2"
             memory: 32Mi
           limits:
-            cpu: "1.0"
             memory: 500Mi
         volumeMounts:
           - name: camel-evotempus-storage

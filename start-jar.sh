@@ -7,10 +7,12 @@ help() {
 
 clear
 
-while getopts ":d:e:h:" opt ; do
+while getopts ":d:e:h:p:u:" opt ; do
   case "$opt" in
     d) EVOTEMPUS_DEST_DIR=${OPTARG} ;;
     e) EVOTEMPUS_DB_HOST=${OPTARG} ;;
+    u) EVOTEMPUS_DB_USER=${OPTARG} ;;
+    p) EVOTEMPUS_DB_PASSWD=${OPTARG} ;;
     h) help
        ;;
     \\?) help
@@ -29,6 +31,7 @@ if [ -z "${EVOTEMPUS_DEST_DIR}" ]; then
 fi
 
 echo "Evotempus DB Host: ${EVOTEMPUS_DB_HOST}"
+echo "Evotempus DB User: ${EVOTEMPUS_DB_USER}"
 echo "Evotempus Destination Directory: ${EVOTEMPUS_DEST_DIR}"
 
 rm -rf ${EVOTEMPUS_DEST_DIR}
@@ -41,5 +44,7 @@ fi
 
 java \
   -Devotempus.db.host=${EVOTEMPUS_DB_HOST} \
+  -Devotempus.db.user=${EVOTEMPUS_DB_USER} \
+  -Devotempus.db.passwd=${EVOTEMPUS_DB_PASSWD} \
   -Devotempus.dest.dir=${EVOTEMPUS_DEST_DIR} \
   -jar "${JAR_FILE}"

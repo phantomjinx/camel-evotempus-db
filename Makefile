@@ -19,7 +19,7 @@
 #
 SHELL := /bin/bash
 
-VERSION ?= 1.0.0
+VERSION ?= 1.0.1
 KUSTOMIZE_VERSION := v4.5.4
 
 CAMEL_IMAGE_NAME ?= quay.io/phantomjinx/camel-evotempus
@@ -42,30 +42,28 @@ MAKE := make --no-print-directory
 CAMEL_DOCKERFILE=Dockerfile-camel
 NGINX_DOCKERFILE=Dockerfile-nginx
 
-default: build
-
-docker:
-ifeq (, $(shell command -v docker 2> /dev/null))
-	$(error "No docker found in PATH. Please install docker and re-run")
+podman:
+ifeq (, $(shell command -v podman 2> /dev/null))
+	$(error "No podman found in PATH. Please install podman and re-run")
 else
-MAVEN=$(shell command -v docker 2> /dev/null)
+MAVEN=$(shell command -v podman 2> /dev/null)
 endif
 
-build-camel: docker
+build-camel: podman
 	@echo "####### Building $(CUSTOM_CAMEL_IMAGE) ..."
-	docker build -t $(CUSTOM_CAMEL_IMAGE):$(CUSTOM_CAMEL_VERSION) -f $(CAMEL_DOCKERFILE) .
+	podman build -t $(CUSTOM_CAMEL_IMAGE):$(CUSTOM_CAMEL_VERSION) -f $(CAMEL_DOCKERFILE) .
 
 image-camel-push: build-camel
-	docker push $(CUSTOM_CAMEL_IMAGE):$(CUSTOM_CAMEL_VERSION)
+	podman push $(CUSTOM_CAMEL_IMAGE):$(CUSTOM_CAMEL_VERSION)
 
-build-nginx: docker
+build-nginx: podman
 	@echo "####### Building $(CUSTOM_NGINX_IMAGE) ..."
-	docker build -t $(CUSTOM_NGINX_IMAGE):$(CUSTOM_NGINX_VERSION) -f $(NGINX_DOCKERFILE) .
+	podman build -t $(CUSTOM_NGINX_IMAGE):$(CUSTOM_NGINX_VERSION) -f $(NGINX_DOCKERFILE) .
 
 image-nginx-push: build-nginx
-		docker push $(CUSTOM_NGINX_IMAGE):$(CUSTOM_NGINX_VERSION)
+		podman push $(CUSTOM_NGINX_IMAGE):$(CUSTOM_NGINX_VERSION)
 
-.PHONY: docker build-camel image-camel-push build-nginx image-nginx-push
+.PHONY: podman build-camel image-camel-push build-nginx image-nginx-push
 
 #
 # Allows for resources to be loaded from outside the root location of
@@ -94,6 +92,8 @@ endif
 DRY_RUN ?= false
 NAMESPACE ?= hawtio-dev
 EVOTEMPUS_DB_HOST ?= localhost
+EVOTEMPUS_DB_USER ?= root
+EVOTEMPUS_DB_PASSWD ?= root123
 EVOTEMPUS_DEST_DIR ?= /home/evotempus
 
 # Cluster on which to install [ openshift | k8s ]
@@ -106,6 +106,8 @@ DEPLOY := deploy
 PATCHES := patches
 PLACEHOLDER := placeholder
 EVOTEMPUS_DB_HOST_PLACEHOLDER := localhost
+EVOTEMPUS_DB_USER_PLACEHOLDER := root
+EVOTEMPUS_DB_PASSWD_PLACEHOLDER := admin
 EVOTEMPUS_DEST_DIR_PLACEHOLDER := /home/evotempus
 
 #
@@ -150,8 +152,14 @@ endef
 check-admin: kubectl
 	@output=$$(kubectl get crd 2>&1) || (echo "****" && echo "**** ERROR: Cannot continue as user is not a Cluster-Admin ****" && echo "****"; exit 1)
 
-evotempus-option-values:
+evotempus-option-values-enc:
+EVOTEMPUS_DB_USER_ENC=$(shell echo "$(EVOTEMPUS_DB_USER)" | base64)
+EVOTEMPUS_DB_PASSWD_ENC=$(shell echo "$(EVOTEMPUS_DB_PASSWD)" | base64)
+
+evotempus-option-values: evotempus-option-values-enc
 	@echo "Using EVOTEMPUS_DB_HOST: $(EVOTEMPUS_DB_HOST)"
+	@echo "Using EVOTEMPUS_DB_USER: $(EVOTEMPUS_DB_USER)"
+	@echo "Using EVOTEMPUS_DB_PASSWD: $(EVOTEMPUS_DB_PASSWD)"
 	@echo "Using EVOTEMPUS_DEST_DIR: $(EVOTEMPUS_DEST_DIR)"
 
 #---
@@ -166,6 +174,8 @@ evotempus-option-values:
 #* PARAMETERS:
 #** CLUSTER_TYPE:          Set the cluster type to install on [ openshift | k8s ]
 #** EVOTEMPUS_DB_HOST:     Set the host of the evotempus database
+#** EVOTEMPUS_DB_USER:     Set the user of the evotempus database
+#** EVOTEMPUS_DB_PASSWD:   Set the password of the evotempus database
 #** EVOTEMPUS_DEST_DIR:    Set the destination directory of the evotempus extraction
 #** NAMESPACE:             Set the namespace for the resources
 #** CUSTOM_CAMEL_IMAGE:    Set a custom camel image to install from
@@ -191,14 +201,18 @@ install: kustomize kubectl evotempus-option-values
 ifeq ($(DRY_RUN), false)
 	@$(KUSTOMIZE) build $(KOPTIONS) $(DEPLOY)/$(CLUSTER_TYPE) | \
 		sed 's~$(PLACEHOLDER)~$(NAMESPACE)~' | \
-        sed 's~$(EVOTEMPUS_DB_HOST_PLACEHOLDER)~$(EVOTEMPUS_DB_HOST)~' | \
-				sed 's~$(EVOTEMPUS_DEST_DIR_PLACEHOLDER)~$(EVOTEMPUS_DEST_DIR)~' | \
+		sed 's~$(EVOTEMPUS_DB_HOST_PLACEHOLDER)~$(EVOTEMPUS_DB_HOST)~' | \
+		sed 's~$(EVOTEMPUS_DEST_DIR_PLACEHOLDER)~$(EVOTEMPUS_DEST_DIR)~' | \
+		sed 's~username: .*~username: $(EVOTEMPUS_DB_USER_ENC)~' | \
+		sed 's~password: .*~password: $(EVOTEMPUS_DB_PASSWD_ENC)~' | \
 		kubectl apply -f -
 else
 	@$(KUSTOMIZE) build $(KOPTIONS) $(DEPLOY)/$(CLUSTER_TYPE) | \
 		sed 's~$(PLACEHOLDER)~$(NAMESPACE)~' | \
-    sed 's~$(EVOTEMPUS_DB_HOST_PLACEHOLDER)~$(EVOTEMPUS_DB_HOST)~' | \
-		sed 's~$(EVOTEMPUS_DEST_DIR_PLACEHOLDER)~$(EVOTEMPUS_DEST_DIR)~'
+		sed 's~$(EVOTEMPUS_DB_HOST_PLACEHOLDER)~$(EVOTEMPUS_DB_HOST)~' | \
+		sed 's~$(EVOTEMPUS_DEST_DIR_PLACEHOLDER)~$(EVOTEMPUS_DEST_DIR)~' | \
+		sed 's~username: .*~username: $(EVOTEMPUS_DB_USER_ENC)~' | \
+		sed 's~password: .*~password: $(EVOTEMPUS_DB_PASSWD_ENC)~'
 endif
 
 #---

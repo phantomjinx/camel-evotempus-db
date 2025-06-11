@@ -13,9 +13,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring.boot-version>3.3.2</spring.boot-version>
         <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
-        <camel.springboot.version>4.4.0.redhat-00025</camel.springboot.version>
-        <camel.version>4.4.0.redhat-00037</camel.version>
-        <hawtio.version>4.0.0.redhat-00072</hawtio.version>
+        <camel.springboot.version>4.10.3.redhat-00019</camel.springboot.version>
+        <camel.version>4.10.3.redhat-00020</camel.version>
+        <hawtio.version>4.2.0.redhat-00034</hawtio.version>
     </properties>
 
     <dependencyManagement>
@@ -205,6 +205,8 @@
                 <configuration>
                   <systemPropertyVariables>
                     <evotempus.db.host>${evotempus.db.host}</evotempus.db.host>
+                    <evotempus.db.user>${evotempus.db.user}</evotempus.db.user>
+                    <evotempus.db.passwd>${evotempus.db.passwd}</evotempus.db.passwd>
                     <evotempus.dest.dir>${evotempus.dest.dir}</evotempus.dest.dir>
                   </systemPropertyVariables>
                 </configuration>
