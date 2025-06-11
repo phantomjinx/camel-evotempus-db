@@ -30,6 +30,20 @@ public class EvotempusSpringBootApplication {
             System.out.println("Info: no evotempus.db.host property was specified. Default will be used.");
         }
 
+        String dbUser = System.getProperty("evotempus.db.user","");
+        if (dbUser.length() > 0) {
+            System.out.println("Info: evotempus.db.user property was specified as " + dbUser);
+        } else {
+            System.out.println("Info: no evotempus.db.user property was specified. Default will be used.");
+        }
+
+        String dbPasswd = System.getProperty("evotempus.db.passwd","");
+        if (dbPasswd.length() > 0) {
+            System.out.println("Info: evotempus.db.passwd property was specified.");
+        } else {
+            System.out.println("Info: no evotempus.db.passwd property was specified. Default will be used.");
+        }
+
         String destDir = System.getProperty("evotempus.dest.dir","");
         if (destDir.length() > 0) {
             System.out.println("Info: evotempus.dest.dir property was specified as " + destDir);
